@@ -1,5 +1,5 @@
 require("dotenv").config();
-const express = require('express');
+const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 
@@ -13,9 +13,9 @@ app.post("/signup", async (req, res) => {
         await user.save();
         res.send("User created successfully");
     } catch (error) {
-        res.send("Failed to create user", error.message);
+        res.status(400).send("Failed to create user" + error.message);
     }
-})
+});
 
 app.get("/user", async (req, res) => {
     try {
@@ -25,9 +25,9 @@ app.get("/user", async (req, res) => {
         }
         res.send(user);
     } catch (error) {
-        res.status(400).send("Something went wrong");
+        res.status(400).send("Something went wrong" + error.message);
     }
-})
+});
 
 app.get("/feed", async (req, res) => {
     try {
@@ -37,9 +37,9 @@ app.get("/feed", async (req, res) => {
         }
         res.send(users);
     } catch (error) {
-        res.status(400).send("Something went wrong");
+        res.status(400).send("Something went wrong" + error.message);
     }
-})
+});
 
 app.delete("/user", async (req, res) => {
     const userId = req.body.id;
@@ -48,22 +48,24 @@ app.delete("/user", async (req, res) => {
         await User.findByIdAndDelete(userId);
         res.send("User deleted successfully");
     } catch (error) {
-        res.status(400).send("Something went wrong");
+        res.status(400).send("Failed to delete user: " + error.message);
     }
-})
+});
 
 app.patch("/user", async (req, res) => {
     try {
         const userId = req.body.id;
         const data = req.body;
-        const userBeforeUpdate = await User.findByIdAndUpdate(userId, data, { returnDocument: 'before' });
+        const userBeforeUpdate = await User.findByIdAndUpdate(userId, data, {
+            returnDocument: "before",
+            runValidators: true,
+        });
         console.log(userBeforeUpdate);
         res.send("User updated successfully");
-
     } catch (error) {
-        res.status(400).send("Something went wrong");
+        res.status(400).send("Failed to update user: " + error.message);
     }
-})
+});
 
 app.patch("/newUser", async (req, res) => {
     try {
@@ -71,17 +73,18 @@ app.patch("/newUser", async (req, res) => {
         const data = req.body;
         await User.findOneAndUpdate({ emailId: email }, data);
         res.send("User updated successfully");
-
     } catch (error) {
         res.status(400).send("Something went wrong");
     }
-})
+});
 
-connectDB().then(() => {
+connectDB()
+    .then(() => {
     console.log("Connected to database");
     app.listen(3000, () => {
         console.log("Listening on port 3000");
     });
-}).catch((err) => {
+    })
+    .catch((err) => {
     console.log("Failed to connect to database", err);
-});
+    });
