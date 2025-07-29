@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,6 +20,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxLength: [50, "Email cannot be more than 50 characters"],
       unique: [true, "Email already exists"],
+      validate: [
+        function (value) {
+          return validator.isEmail(value);
+        },
+        "Invalid email",
+      ],
     },
     password: {
       type: String,
@@ -39,6 +46,16 @@ const userSchema = new mongoose.Schema(
           return ["male", "female", "other"].includes(value.toLowerCase());
         },
         "Gender must be male, female or other",
+      ],
+    },
+    photoUrl: {
+      type: String,
+      default: "",
+      validate: [
+        function (value) {
+          return validator.isURL(value);
+        },
+        "Invalid Image URL",
       ],
     },
     about: {
