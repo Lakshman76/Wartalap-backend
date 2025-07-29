@@ -52,39 +52,45 @@ app.delete("/user", async (req, res) => {
     }
 });
 
-app.patch("/user", async (req, res) => {
-    try {
-        const userId = req.body.id;
-        const data = req.body;
-        const userBeforeUpdate = await User.findByIdAndUpdate(userId, data, {
-            returnDocument: "before",
-            runValidators: true,
-        });
-        console.log(userBeforeUpdate);
-        res.send("User updated successfully");
-    } catch (error) {
-        res.status(400).send("Failed to update user: " + error.message);
+app.patch("/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const data = req.body;
+    const UPDATE_ALLOWED = ["password", "age", "gender", "about", "skills"];
+    const isUpdateAllowed = Object.keys(data).every((key) =>
+      UPDATE_ALLOWED.includes(key)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Updation not allowed");
     }
+    const userBeforeUpdate = await User.findByIdAndUpdate(userId, data, {
+      returnDocument: "before",
+      runValidators: true,
+    });
+    res.send("User updated successfully");
+  } catch (error) {
+    res.status(400).send("Failed to update user: " + error.message);
+  }
 });
 
 app.patch("/newUser", async (req, res) => {
-    try {
-        const email = req.body.email;
-        const data = req.body;
-        await User.findOneAndUpdate({ emailId: email }, data);
-        res.send("User updated successfully");
-    } catch (error) {
-        res.status(400).send("Something went wrong");
-    }
+  try {
+    const email = req.body.email;
+    const data = req.body;
+    await User.findOneAndUpdate({ emailId: email }, data);
+    res.send("User updated successfully");
+  } catch (error) {
+    res.status(400).send("Something went wrong");
+  }
 });
 
 connectDB()
-    .then(() => {
+  .then(() => {
     console.log("Connected to database");
     app.listen(3000, () => {
-        console.log("Listening on port 3000");
+      console.log("Listening on port 3000");
     });
-    })
-    .catch((err) => {
+  })
+  .catch((err) => {
     console.log("Failed to connect to database", err);
-    });
+  });
