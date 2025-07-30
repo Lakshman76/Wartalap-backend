@@ -14,11 +14,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxLength: [30, "Last name cannot be more than 30 characters"],
     },
-    emailId: {
+    email: {
       type: String,
       required: [true, "Email is required"],
       trim: true,
-      maxLength: [50, "Email cannot be more than 50 characters"],
+      maxLength: [100, "Email cannot be more than 100 characters"],
       unique: [true, "Email already exists"],
       validate: [
         function (value) {
@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minLength: [6, "Password must be at least 6 characters"],
       maxLength: [50, "Password cannot be more than 50 characters"],
+      validate: [
+        function (value) {
+          return validator.isStrongPassword(value);
+        },
+        "Please enter a strong password",
+      ],
     },
     age: {
       type: Number,
@@ -68,9 +74,9 @@ const userSchema = new mongoose.Schema(
       type: [String],
       validate: [
         function (value) {
-          return value.length <= 5;
+          return value.length <= 10;
         },
-        "Skills cannot be more than 5",
+        "Skills cannot be more than 10",
       ],
     },
   },

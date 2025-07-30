@@ -77,7 +77,7 @@ app.patch("/newUser", async (req, res) => {
   try {
     const email = req.body.email;
     const data = req.body;
-    await User.findOneAndUpdate({ emailId: email }, data);
+    await User.findOneAndUpdate({ email: email }, data);
     res.send("User updated successfully");
   } catch (error) {
     res.status(400).send("Something went wrong");
