@@ -32,7 +32,6 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       trim: true,
       minLength: [6, "Password must be at least 6 characters"],
-      maxLength: [50, "Password cannot be more than 50 characters"],
       validate: [
         function (value) {
           return validator.isStrongPassword(value);
@@ -56,7 +55,6 @@ const userSchema = new mongoose.Schema(
     },
     photoUrl: {
       type: String,
-      default: "",
       validate: [
         function (value) {
           return validator.isURL(value);

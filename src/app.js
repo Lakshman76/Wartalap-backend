@@ -2,19 +2,27 @@ require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-    const user = new User(req.body);
-    try {
-        await user.save();
-        res.send("User created successfully");
-    } catch (error) {
-        res.status(400).send("Failed to create user: " + error.message);
-    }
+  try {
+    const { firstName, lastName, email, password } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
+    });
+    await user.save();
+    res.send("User created successfully");
+  } catch (error) {
+    res.status(400).send("Failed to create user: " + error.message);
+  }
 });
 
 app.get("/user", async (req, res) => {
