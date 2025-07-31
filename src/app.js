@@ -3,10 +3,13 @@ const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   try {
@@ -34,12 +37,35 @@ app.post("/login", async (req, res) => {
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (isPasswordValid) {
-      res.send(user);
+      const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
+        expiresIn: "7d",
+      });
+      res.cookie("token", token);
+      res.send("Login successfully!");
     } else {
       throw new Error("Invalid email or password");
     }
   } catch (error) {
     res.status(400).send("Failed to login user: " + error.message);
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const cookie = req.cookies;
+    const { token } = cookie;
+    if (!token) {
+      throw new Error("Invalid token");
+    }
+    const data = jwt.verify(token, process.env.SECRET_KEY);
+    const { _id } = data;
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    res.send(user);
+  } catch (error) {
+    res.status(400).send("Failed to fetch user profile: " + error.message);
   }
 });
 
